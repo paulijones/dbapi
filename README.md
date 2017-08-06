@@ -11,6 +11,8 @@ I intend to continue working on this and finish more of the api's. I just wanted
 Simply put the unziped csv files into the same directory as the source, build/run
 it uses port 12345 on the machine to serve the API's
 
+There are also a few print statments that tell you what step it is currently at while preprocessing. Once it completes it also prints out how long it took to do the preprocessing.
+
 ### API calls
 get localhost:12345/session/{session_id}/AllHRM
 
