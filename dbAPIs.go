@@ -104,7 +104,7 @@ func preprocessSessions() {
 		}
 		sesid, err := strconv.Atoi(record[0])
 		if err != nil {
-			fmt.Println("NaN")
+			fmt.Println("NaN, skipping first line in file")
 		} else {
 			uid, _ := strconv.Atoi(record[1])
 			dur, _ := strconv.Atoi(record[3])
@@ -134,7 +134,7 @@ func preprocessData() {
 		}
 		sesid, err := strconv.Atoi(record[0])
 		if err != nil {
-			fmt.Println("NaN")
+			fmt.Println("NaN, skipping first line of file")
 		} else {
 			bpm, _ := strconv.Atoi(record[1])
 			start := record[2]
@@ -151,33 +151,8 @@ func preprocessData() {
 }
 
 //Done Preproccessing
-
-func GetPersonHRM(w http.ResponseWriter, req *http.Request) {
-	params := mux.Vars(req)
-	for _, item := range people {
-		if item.ID == params["id"] {
-
-			json.NewEncoder(w).Encode(item)
-			return
-		}
-	}
-	json.NewEncoder(w).Encode(&Person{})
-}
-
-func GetPeopleEndpoint(w http.ResponseWriter, req *http.Request) {
-	json.NewEncoder(w).Encode(people)
-}
-
-func GetAllHRM(w http.ResponseWriter, req *http.Request) {
-	allBPMs := make([]HRdata, 0)
-	for i := 1; i < len(sessions); i++ {
-		curses := strconv.Itoa(i)
-		curHRdata := HRMbySession(curses)
-		allBPMs = append(allBPMs, curHRdata)
-	}
-	json.NewEncoder(w).Encode(allBPMs)
-}
-
+//
+//Begining fuctions for calculating data
 func HRMbySession(id string) HRdata {
 	sesidnum, _ := strconv.Atoi(id)
 	min, max, sum := 0, 0, 0
@@ -200,6 +175,35 @@ func HRMbySession(id string) HRdata {
 	return hrstruct
 }
 
+//Done with fuctions
+//
+//Begin API's
+
+func GetPersonEndpoint(w http.ResponseWriter, req *http.Request) {
+	params := mux.Vars(req)
+	for _, item := range people {
+		if item.ID == params["id"] {
+			json.NewEncoder(w).Encode(item)
+			return
+		}
+	}
+	json.NewEncoder(w).Encode(&Person{})
+}
+
+func GetPeopleEndpoint(w http.ResponseWriter, req *http.Request) {
+	json.NewEncoder(w).Encode(people)
+}
+
+func GetAllHRM(w http.ResponseWriter, req *http.Request) {
+	allBPMs := make([]HRdata, 0)
+	for i := 1; i < len(sessions); i++ {
+		curses := strconv.Itoa(i)
+		curHRdata := HRMbySession(curses)
+		allBPMs = append(allBPMs, curHRdata)
+	}
+	json.NewEncoder(w).Encode(allBPMs)
+}
+
 func GetSessionHRM(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	hrstruct := HRMbySession(params["id"])
@@ -220,7 +224,8 @@ func main() {
 	//	fmt.Println(len(people))
 	router := mux.NewRouter()
 	router.HandleFunc("/people", GetPeopleEndpoint).Methods("GET")
-	router.HandleFunc("/people/{id}/AllHRM", GetPersonHRM).Methods("GET")
+	router.HandleFunc("/people/{id}", GetPersonEndpoint).Methods("GET")
+	//router.HandleFunc("/people/{id}/AllHRM", GetPersonHRM).Methods("GET")
 	router.HandleFunc("/session/{id}/AllHRM", GetSessionHRM).Methods("GET")
 	router.HandleFunc("/session/AllHRM", GetAllHRM).Methods("GET")
 	log.Fatal(http.ListenAndServe(":12345", router))
