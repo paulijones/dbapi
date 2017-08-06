@@ -24,6 +24,10 @@ returns the min/max/avg bpm for all sessions in json.
 I did not implement pagination/result limiting, so it will be a big response.
 
 ##### Unrequested API's
+get localhost:12345/people/{id}
+
+returns json for person {id}
+
 get localhost:12345/people
 
 returns all of the people from users.csv in json
